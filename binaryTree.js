@@ -1,3 +1,4 @@
+// Node class
 class Node {
   constructor(data) {
     this.data = data;
@@ -18,6 +19,7 @@ class BinaryTree {
     if (this.root === null) {
       this.root = newNode;
       playInsertSound(); // Play sound on insert
+      this.visualize(); // Update visualization
       return;
     }
 
@@ -27,6 +29,7 @@ class BinaryTree {
         if (current.left === null) {
           current.left = newNode;
           playInsertSound(); // Play sound on insert
+          this.visualize(); // Update visualization
           return;
         }
         current = current.left;
@@ -34,6 +37,7 @@ class BinaryTree {
         if (current.right === null) {
           current.right = newNode;
           playInsertSound(); // Play sound on insert
+          this.visualize(); // Update visualization
           return;
         }
         current = current.right;
@@ -44,7 +48,7 @@ class BinaryTree {
   // Delete a node
   delete(data) {
     this.root = this._delete(this.root, data);
-    this.visualize();
+    this.visualize(); // Update visualization
   }
 
   _delete(node, data) {
@@ -86,13 +90,11 @@ class BinaryTree {
   }
 
   _search(node, data) {
-    if (node === null) {
-      return false;
+    if (node === null || node.data === data) {
+      return node;
     }
 
-    if (data === node.data) {
-      return true;
-    } else if (data < node.data) {
+    if (data < node.data) {
       return this._search(node.left, data);
     } else {
       return this._search(node.right, data);
@@ -101,99 +103,138 @@ class BinaryTree {
 
   // Visualize the binary tree
   visualize() {
-    document.getElementById('svg-lines').innerHTML = ''; // Clear previous SVG
+    let svgLines = document.getElementById('svg-lines');
+    svgLines.innerHTML = ''; // Clear previous SVG content
 
     if (this.root === null) {
       return;
     }
 
-    this._visualize(this.root, 250, 30, 200);
+    let treeHeight = this._height(this.root);
+    let treeWidth = Math.pow(2, treeHeight) * 40;
+    svgLines.setAttribute('width', treeWidth);
+
+    let rootX = treeWidth / 2;
+    let rootY = 50;
+    this._visualizeNode(this.root, rootX, rootY, treeWidth / 4, 50, 1, svgLines);
   }
 
-  _visualize(node, x, y, spacing) {
-    let nodeElement = document.createElement('div');
-    nodeElement.className = 'node';
-    nodeElement.style.left = `${x}px`;
-    nodeElement.style.top = `${y}px`;
-    nodeElement.innerHTML = `${node.data}`;
-    document.getElementById('tree').appendChild(nodeElement);
+  _visualizeNode(node, x, y, dx, dy, level, svgLines) {
+    let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', x);
+    circle.setAttribute('cy', y);
+    circle.setAttribute('r', 15);
+    circle.setAttribute('stroke', 'black');
+    circle.setAttribute('stroke-width', 2);
+    circle.setAttribute('fill', 'lightblue');
+    svgLines.appendChild(circle);
+
+    let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', x);
+    text.setAttribute('y', y);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'middle');
+    text.setAttribute('font-size', '12px');
+    text.textContent = node.data;
+    svgLines.appendChild(text);
 
     if (node.left !== null) {
-      this._drawLine(x, y + 15, x - spacing / 2, y + 65);
-      this._visualize(node.left, x - spacing / 2, y + 50, spacing / 2);
+      let leftX = x - dx / Math.pow(2, level);
+      let leftY = y + dy;
+      let lineLeft = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      lineLeft.setAttribute('x1', x);
+      lineLeft.setAttribute('y1', y);
+      lineLeft.setAttribute('x2', leftX);
+      lineLeft.setAttribute('y2', leftY);
+      lineLeft.setAttribute('stroke', 'black');
+      svgLines.appendChild(lineLeft);
+      this._visualizeNode(node.left, leftX, leftY, dx, dy, level + 1, svgLines);
     }
 
     if (node.right !== null) {
-      this._drawLine(x, y + 15, x + spacing / 2, y + 65);
-      this._visualize(node.right, x + spacing / 2, y + 50, spacing / 2);
+      let rightX = x + dx / Math.pow(2, level);
+      let rightY = y + dy;
+      let lineRight = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      lineRight.setAttribute('x1', x);
+      lineRight.setAttribute('y1', y);
+      lineRight.setAttribute('x2', rightX);
+      lineRight.setAttribute('y2', rightY);
+      lineRight.setAttribute('stroke', 'black');
+      svgLines.appendChild(lineRight);
+      this._visualizeNode(node.right, rightX, rightY, dx, dy, level + 1, svgLines);
     }
   }
 
-  // Draw line between nodes
-  _drawLine(x1, y1, x2, y2) {
-    let lineElement = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    lineElement.setAttribute('x1', x1);
-    lineElement.setAttribute('y1', y1);
-    lineElement.setAttribute('x2', x2);
-    lineElement.setAttribute('y2', y2);
-    lineElement.setAttribute('stroke', 'black');
-    document.getElementById('svg-lines').appendChild(lineElement);
+  // Helper function to calculate tree height
+  _height(node) {
+    if (node === null) {
+      return 0;
+    }
+    let leftHeight = this._height(node.left);
+    let rightHeight = this._height(node.right);
+    return Math.max(leftHeight, rightHeight) + 1;
   }
 }
 
-// Initialize binary tree
-let binaryTree = new BinaryTree();
-
-// Function to play insert sound
+// Function to play insert sound effect
 function playInsertSound() {
   let audio = document.getElementById('insertSound');
-  audio.currentTime = 0; // Rewind to the start
   audio.play();
 }
 
-// Insert function
+// Global binary tree instance
+let binaryTree = new BinaryTree();
+
+// Insert button click handler
 function insert() {
-  let data = document.getElementById('data').value;
-  if (data === '') {
-    document.getElementById('error').textContent = 'Please enter data';
+  let dataInput = document.getElementById('data');
+  let data = parseInt(dataInput.value.trim());
+  if (isNaN(data)) {
+    showError('Please enter a valid number.');
     return;
   }
-
-  binaryTree.insert(parseInt(data));
-  binaryTree.visualize();
-  document.getElementById('data').value = '';
-  document.getElementById('error').textContent = '';
+  binaryTree.insert(data);
+  dataInput.value = '';
+  showError('');
 }
 
-// Delete function
+// Delete button click handler
 function deleteNode() {
-  let data = document.getElementById('data').value;
-  if (data === '') {
-    document.getElementById('error').textContent = 'Please enter data';
+  let dataInput = document.getElementById('data');
+  let data = parseInt(dataInput.value.trim());
+  if (isNaN(data)) {
+    showError('Please enter a valid number.');
     return;
   }
-
-  binaryTree.delete(parseInt(data));
-  binaryTree.visualize();
-  document.getElementById('data').value = '';
-  document.getElementById('error').textContent = '';
+  binaryTree.delete(data);
+  dataInput.value = '';
+  showError('');
 }
 
-// Search function
+// Search button click handler
 function searchNode() {
-  let data = document.getElementById('data').value;
-  if (data === '') {
-    document.getElementById('error').textContent = 'Please enter data';
+  let dataInput = document.getElementById('data');
+  let data = parseInt(dataInput.value.trim());
+  if (isNaN(data)) {
+    showError('Please enter a valid number.');
     return;
   }
-
-  let result = binaryTree.search(parseInt(data));
-  if (result) {
-    alert(`Node with value ${data} found in the tree!`);
+  let result = binaryTree.search(data);
+  if (result !== null) {
+    showError(`Node ${data} found!`);
   } else {
-    alert(`Node with value ${data} not found in the tree.`);
+    showError(`Node ${data} not found.`);
   }
-
-  document.getElementById('data').value = '';
-  document.getElementById('error').textContent = '';
+  dataInput.value = '';
 }
+
+// Function to show error messages
+function showError(message) {
+  let errorSpan = document.getElementById('error');
+  errorSpan.textContent = message;
+}
+
+// Initial visualization on page load
+document.addEventListener('DOMContentLoaded', function() {
+  binaryTree.visualize();
+});

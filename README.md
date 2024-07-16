@@ -1,4 +1,4 @@
-# BST-PROJECT
+**BINARY SEARCH VISUALIZER**
 
 # Project Document
 

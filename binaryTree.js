@@ -1,4 +1,4 @@
-// Node class
+
 class Node {
   constructor(data) {
     this.data = data;
@@ -7,13 +7,12 @@ class Node {
   }
 }
 
-// Binary Tree class
 class BinaryTree {
   constructor() {
     this.root = null;
   }
 
-  // Insert a new node
+  
   insert(data) {
     let newNode = new Node(data);
     if (this.root === null) {
@@ -45,7 +44,7 @@ class BinaryTree {
     }
   }
 
-  // Delete a node
+  
   delete(data) {
     this.root = this._delete(this.root, data);
     this.visualize(); // Update visualization
@@ -68,7 +67,7 @@ class BinaryTree {
         return node.left;
       }
 
-      // Case 2: Node with two children - find successor
+      
       let successor = this._findMin(node.right);
       node.data = successor.data;
       node.right = this._delete(node.right, successor.data);
@@ -84,7 +83,7 @@ class BinaryTree {
     return node;
   }
 
-  // Search for a node
+
   search(data) {
     return this._search(this.root, data);
   }
@@ -101,7 +100,7 @@ class BinaryTree {
     }
   }
 
-  // Visualize the binary tree
+  
   visualize() {
     let svgLines = document.getElementById('svg-lines');
     svgLines.innerHTML = ''; // Clear previous SVG content
@@ -165,7 +164,7 @@ class BinaryTree {
     }
   }
 
-  // Helper function to calculate tree height
+  
   _height(node) {
     if (node === null) {
       return 0;
@@ -176,16 +175,15 @@ class BinaryTree {
   }
 }
 
-// Function to play insert sound effect
+
 function playInsertSound() {
   let audio = document.getElementById('insertSound');
   audio.play();
 }
 
-// Global binary tree instance
 let binaryTree = new BinaryTree();
 
-// Insert button click handler
+
 function insert() {
   let dataInput = document.getElementById('data');
   let data = parseInt(dataInput.value.trim());
@@ -198,7 +196,7 @@ function insert() {
   showError('');
 }
 
-// Delete button click handler
+
 function deleteNode() {
   let dataInput = document.getElementById('data');
   let data = parseInt(dataInput.value.trim());
@@ -211,7 +209,6 @@ function deleteNode() {
   showError('');
 }
 
-// Search button click handler
 function searchNode() {
   let dataInput = document.getElementById('data');
   let data = parseInt(dataInput.value.trim());
@@ -228,13 +225,13 @@ function searchNode() {
   dataInput.value = '';
 }
 
-// Function to show error messages
+
 function showError(message) {
   let errorSpan = document.getElementById('error');
   errorSpan.textContent = message;
 }
 
-// Initial visualization on page load
+
 document.addEventListener('DOMContentLoaded', function() {
   binaryTree.visualize();
 });
